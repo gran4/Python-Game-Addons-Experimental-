@@ -33,6 +33,7 @@ class MyGame(arcade.Window):
         Healup = healUps(center_x=x, center_y=y, heal=heal)
         self.Healups.append(Healup)#[print(heal) for heal in self.Healups]
         self.physics_engine.add_collision_handler("heal", "player", post_handler=Healup.player_hit_handler)
+    
     def addSpringBoard(self, x:float, y:float, impulse:list=[0, 0], rotated:int=4):
         Springboard = SpringBoard(x, y, impulse=impulse, rotated=rotated)
         self.SpringBoards.append(Springboard)#[print(heal) for heal in self.Healups]
@@ -138,7 +139,7 @@ class MyGame(arcade.Window):
         for springboard in World["springBoards"]:
             self.addSpringBoard(springboard[0], springboard[1], springboard[2], springboard[3])
         for text in World["text"]:
-            self.Texts.append(CustomText(text[0], text[1], text[2]))
+            self.Texts.append(CustomText(text[0], text[1], text=text[2], rotated=text[3]))
         
    
     def on_draw(self):
@@ -166,7 +167,7 @@ class MyGame(arcade.Window):
         self.Healups.draw()
         
         #Text
-        [arcade.draw_text(Text.text, Text.x, Text.y, color=Text.color, rotation=Text.rotation) for Text in self.Texts]
+        [arcade.draw_text(Text.text, Text.x, Text.y, rotation=Text.rotation) for Text in self.Texts if Text.x+self.player.center_x <= 1000 and Text.x+self.player.center_x >= -1000 and Text.y+self.player.center_y <= 1000 and Text.y+self.player.center_y >= -1000]
         
 
     def on_key_press(self, key:int, modifiers):
@@ -218,6 +219,7 @@ class MyGame(arcade.Window):
         
 
         self.physics_engine.step(delta_time=delta_time)
+        print(delta_time)
         self.center_camera_to_player()
     
 
@@ -251,8 +253,13 @@ class MyGame(arcade.Window):
         self.UpdatePlayerImpulse()
 
 
-    #updates everything except player
+    #contains updates for everything except player
     def generalUpdate(self, delta_time:float):
+        self.maggotUpdate(delta_time)
+        self.turretUpdate(delta_time)
+
+
+    def maggotUpdate(self, delta_time:float):
         #updates maggots
         for maggot in self.Maggots:
             #change position
@@ -269,6 +276,7 @@ class MyGame(arcade.Window):
                 #flips texture
                 maggot.change_texture()
 
+    def turretUpdate(self, delta_time:float):
         self.Turrettime += delta_time
         if self.Turrettime >= 1.5:
             #uses SpawnBullet() to spawn bullets
@@ -283,14 +291,14 @@ class MyGame(arcade.Window):
         self.jumpindex -= 1
         self.physics_engine.apply_impulse(self.player, (0, 750))
     def addPlayerImpulse(self, spring_sprite:arcade.Sprite, _player_sprite:arcade.Sprite, _arbiter, _space, _data):
-        self.playerImpulive.append([spring_sprite.impulse, 8])
+        self.playerImpulive.append([spring_sprite.impulse, 10])
     def UpdatePlayerImpulse(self):
         for impulse in self.playerImpulive:
-            if impulse[1] != 7 or 8:
+            if impulse[1] != 10 or 9 or 8:
                 self.physics_engine.apply_impulse(self.player, impulse[0])#impulse[0]
-                if impulse[1] == 0:
-                    self.playerImpulive.remove(impulse)
             impulse[1] -= 1
+            if impulse[1] <= 0:
+                self.playerImpulive.remove(impulse)
             print(impulse[1])
 
 

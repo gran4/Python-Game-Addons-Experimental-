@@ -1,7 +1,7 @@
 import arcade
 
 class CustomText(object):
-    def __init__(self, x:float, y:float, text:str, size:int, color=arcade.color.BLACK, rotated:int=1):
+    def __init__(self, x:float, y:float, text:str="", size:int=12, color=arcade.color.BLACK, rotated:int=1):
         self.y = y
         self.x = x
         self.text = text
@@ -10,10 +10,10 @@ class CustomText(object):
     
         self.rotated = rotated
         self.rotation = 0
-        self.change()
+        self.updateAngle()
 
     #used to change direction in world editor
-    def change(self):
+    def updateAngle(self):
         #up to left
         if self.rotated == 1:
             self.rotation = 0
@@ -36,7 +36,7 @@ class Land(arcade.Sprite):
         self.hit_box = self.texture.hit_box_points
 
 class SpringBoard(arcade.Sprite):
-    def __init__(self, x:float, y:float, impulse:list=[0, 1000], rotated:int=4):
+    def __init__(self, x:float, y:float, impulse:list=[0, 750], rotated:int=4):
         super().__init__()
         self.texture = arcade.load_texture("Sprites/SpringBoard.png")
         self.center_x = x
@@ -51,19 +51,21 @@ class SpringBoard(arcade.Sprite):
         self.impulseAim()
 
     def impulseAim(self):
+        self.impulse[0] = 0
+        self.impulse[1] = 0
         #aims left
         if self.rotated == 1:
-            self.impulse[0] = -1000
+            self.impulse[0] = -750
         #aims down
         elif self.rotated == 2:
-            self.impulse[1] = -1000
+            self.impulse[1] = -750
         #aims right
         elif self.rotated == 3:
-            self.impulse[0] = 1000
+            self.impulse[0] = 750
         
         #aims up
         elif self.rotated == 4:
-            self.impulse[1] = 1000
+            self.impulse[1] = 750
 
     #used to change direction in world editor
     def updateAngle(self):
@@ -152,3 +154,36 @@ class healUps(arcade.Sprite):
         _player_sprite.health += self.heal
         heal_sprite.remove_from_sprite_lists()
 
+class button(arcade.Sprite):
+    def __init__(self, scale:int=1,
+                 center_x:float=0,
+                 center_y:float=0):
+        super().__init__("Sprites/Box.png", center_x=center_x, center_y=center_y, scale=scale)
+        self.texture = arcade.load_texture("Sprites/Box.png")
+        self.hit_box = self.texture.hit_box_points
+        self.object = None
+    def changeObject(self, obj, typ:int=0):
+        self.object=obj
+        self.toggletype=typ
+    def Toggle(self):
+        if self.object is not None:
+            if type == 0:
+                if self.object.toggle:
+                    self.object.toggle=False
+                else:
+                    self.object.toggle=True
+            elif type == 0:
+                if self.object.toggle:
+                    self.object.toggle=False
+                else:
+                    self.object.toggle=True
+            elif type == 0:
+                if self.object.toggle:
+                    self.object.toggle=False
+                else:
+                    self.object.toggle=True
+            elif type == 0:
+                if self.object.toggle:
+                    self.object.toggle=False
+                else:
+                    self.object.toggle=True

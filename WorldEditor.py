@@ -29,6 +29,7 @@ class MyEditor(arcade.Window):
         self.Maggots = arcade.SpriteList(use_spatial_hash=True, is_static=True)
         self.Turrets = arcade.SpriteList(use_spatial_hash=True, is_static=True)
         self.Healups = arcade.SpriteList(use_spatial_hash=True, is_static=True)
+        self.SSS = arcade.Text("ddd", 1, 100)
 
         #list of texts
         self.Texts = []
@@ -49,8 +50,8 @@ class MyEditor(arcade.Window):
 
         #current num
         self.num = 0
-        #list of numbers 1-9 
-        self.numlist = [49, 50, 51, 52, 53, 54, 55, 56, 57, 58]
+        #list of numbers 0-9 
+        self.numlist = [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58]
 
         #current key being pressed
         self.key = 108
@@ -144,7 +145,7 @@ class MyEditor(arcade.Window):
         for springboard in World["springBoards"]:
             self.SpringBoards.append(SpringBoard(springboard[0], springboard[1], impulse=springboard[2], rotated=springboard[3]))
         for text in World["text"]:
-            self.Texts.append(CustomText(text[0], text[1], text[2]))
+            self.Texts.append(CustomText(text[0], text[1], text=text[2], rotated=text[3]))
 
         #create player
         if World["player"] is not None:
@@ -163,7 +164,7 @@ class MyEditor(arcade.Window):
             Maggot_cords = [(maggot.center_x, maggot.center_y) for maggot in self.Maggots]
             Heal_cords = [(heal.center_x, heal.center_y, heal.heal) for heal in self.Healups]
             SpringBoardCords = [(spring.center_x, spring.center_y, spring.impulse, spring.rotated) for spring in self.SpringBoards]
-            Text_cords = [(Text.center_x, Text.center_y, Text.rotated) for Text in self.Texts]
+            Text_cords = [(Text.x, Text.y, Text.text, Text.rotated) for Text in self.Texts]
             
             #tuple of values
             player_cords = int(self.player.center_x), int(self.player.center_y)
@@ -186,33 +187,8 @@ class MyEditor(arcade.Window):
         y = y/50
         y = round(y)
         y *= 50
-
-        #adds object to world
-        if button == arcade.MOUSE_BUTTON_LEFT:
-            if type(self.last) == CustomText:
-                if self.textBox.center_x == x and self.textBox.center_y == y:
-                    self.last.text = input("Text: ")
-            elif type(self.last) == healUps:
-                if self.textBox.center_x == x and self.textBox.center_y == y:
-                    self.last.text = input("Health: ")
-            [self.change(land) for land in self.Lands if land.center_x == x and land.center_y == y]
-            [self.change(vampire) for vampire in self.Vampires if vampire.center_x == x and vampire.center_y == y]
-            [self.change(maggot) for maggot in self.Maggots if maggot.center_x == x and maggot.center_y == y]
-            [self.change(turret) for turret in self.Turrets if turret.center_x == x and turret.center_y == y]
-            [self.change(heal) for heal in self.Healups if heal.center_x == x and heal.center_y == y]
-            [self.change(spring) for spring in self.SpringBoards if spring.center_x == x and spring.center_y == y]
-            [self.change(text) for text in self.Texts if text.x == x and text.y == y]
-            if self.add:
-                #AddObj function checks and sets object
-                self.AddObj(x, y)
-            elif not self.add:
-                pass
-            else:
-                raise TypeError("self.add is not a bool")
-
-
-        #deletes object if object is right clicked on
-        elif button == arcade.MOUSE_BUTTON_RIGHT:
+        #deletes object if object is right clicked on or num 0 is pressed
+        if button == arcade.MOUSE_BUTTON_RIGHT or self.num == self.numlist[0]:
             [land.remove_from_sprite_lists() for land in self.Lands if land.center_x == x and land.center_y == y]
             [vampire.remove_from_sprite_lists() for vampire in self.Vampires if vampire.center_x == x and vampire.center_y == y]
             [maggot.remove_from_sprite_lists() for maggot in self.Maggots if maggot.center_x == x and maggot.center_y == y]                
@@ -220,6 +196,30 @@ class MyEditor(arcade.Window):
             [heal.remove_from_sprite_lists() for heal in self.Healups if heal.center_x == x and heal.center_y == y]
             [spring.remove_from_sprite_lists() for spring in self.SpringBoards if spring.center_x == x and spring.center_y == y]
             [self.Texts.remove(text) for text in self.Texts if text.x == x and text.y == y]
+        #adds object to world
+        elif button == arcade.MOUSE_BUTTON_LEFT:
+            self.add = True
+            if self.textBox.center_x == x and self.textBox.center_y == y:
+                if type(self.last) == CustomText:    
+                    self.last.text = input("Text: ")
+                elif type(self.last) == healUps:
+                    self.last.heal = int(input("Health: "))
+            else:
+                [self.change(land) for land in self.Lands if land.center_x == x and land.center_y == y]
+                [self.change(vampire) for vampire in self.Vampires if vampire.center_x == x and vampire.center_y == y]
+                [self.change(maggot) for maggot in self.Maggots if maggot.center_x == x and maggot.center_y == y]
+                [self.change(turret) for turret in self.Turrets if turret.center_x == x and turret.center_y == y]
+                [self.change(heal) for heal in self.Healups if heal.center_x == x and heal.center_y == y]
+                [self.change(spring) for spring in self.SpringBoards if spring.center_x == x and spring.center_y == y]
+                [self.change(text) for text in self.Texts if text.x == x and text.y == y]
+                if self.add:
+                    #AddObj function checks and sets object
+                    self.AddObj(x, y)
+                elif not self.add:
+                    pass
+                else:
+                    raise TypeError("self.add is not a bool")
+
     def change(self, obj):
         self.add = False
         self.last = obj
@@ -241,13 +241,14 @@ class MyEditor(arcade.Window):
         #REMEMBER When Adding add to num and key lists
         #This is my garbage work around to writing if statements for each Key
 
+        print("DEIJEJIDEED")
         #move player
-        if self.num == self.numlist[0]:#if num == 1: basicly
+        if self.num == self.numlist[1]:#if num == 1: basicly
             self.player.center_x = x
             self.player.center_y = y
 
         #tiles, crates, spring boards, items in world
-        elif self.num == self.numlist[1]:#if num == 2: basicly
+        elif self.num == self.numlist[2]:#if num == 2: basicly
             if self.key == arcade.key.L:#if key == L: basicly
                 self.Lands.append(Land(x, y))
             elif self.key == arcade.key.S:
@@ -255,7 +256,7 @@ class MyEditor(arcade.Window):
                 self.SpringBoards.append(self.last)
 
         #enemies
-        elif self.num == self.numlist[2]:
+        elif self.num == self.numlist[3]:
             if self.key == arcade.key.T:
                 self.last = Turret(x, y)
                 self.Turrets.append(self.last)
@@ -263,10 +264,11 @@ class MyEditor(arcade.Window):
                 self.Vampires.append(Vampire(x, y))
             elif self.key == arcade.key.M:
                 self.Maggots.append(Maggot(x, y))
-        elif self.num == self.numlist[3]:
+        elif self.num == self.numlist[4]:
             self.last = CustomText(x, y, "Big Bio", 12)
             self.Texts.append(self.last)
-        elif self.num == self.numlist[4]:
+            print("DEIJEJHHHHHHHHHHHHIDEED")
+        elif self.num == self.numlist[5]:
             if self.key == arcade.key.H:
                 self.last = healUps(center_x=x, center_y=y)
                 self.Healups.append(self.last)
